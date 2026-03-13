@@ -2,11 +2,9 @@ import React, {Component} from 'react';
 import { 
   StyleSheet, 
   Text, 
-  View, 
-  TextInput, 
-  TouchableOpacity,
-  StatusBar,
-  TouchableHighlight
+  View,
+  TouchableHighlight,
+  ScrollView
 } from 'react-native';
 import formatTime from 'minutes-seconds-milliseconds';
 
@@ -22,6 +20,7 @@ export default class StopWatch extends Component{
     this.handleLapPress = this.handleLapPress.bind(this);
     this.startButton = this.startButton.bind(this);
     this.handleStartPress = this.handleStartPress.bind(this);
+    this.handleResetPress = this.handleResetPress.bind(this);
   }
 
   startButton() {
@@ -40,6 +39,14 @@ export default class StopWatch extends Component{
     return (
       <TouchableHighlight style={styles.button} underlayColor="gray" onPress={this.handleLapPress}>
         <Text>Lap</Text>
+      </TouchableHighlight>
+    )
+  }
+
+  resetButton() {
+    return (
+      <TouchableHighlight style={[styles.button, {borderColor: '#f1ff2e'}]} underlayColor="gray" onPress={this.handleResetPress}>
+        <Text>Reset</Text>
       </TouchableHighlight>
     )
   }
@@ -81,6 +88,12 @@ export default class StopWatch extends Component{
     });
   }
 
+  handleResetPress() {
+    this.setState({
+      laps: []
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -94,12 +107,13 @@ export default class StopWatch extends Component{
           <View style={styles.buttonWrapper}>
             {this.startButton()}
             {this.lapButton()}
+            {this.resetButton()}
           </View>
         </View>
         
-        <View style={styles.footer}>
+        <ScrollView style={styles.footer}>
           {this.laps()}
-        </View>
+        </ScrollView>
 
       </View>
     );
