@@ -4,7 +4,8 @@ import {
   Text, 
   View,
   TouchableHighlight,
-  ScrollView
+  ScrollView,
+  Platform
 } from 'react-native';
 import formatTime from 'minutes-seconds-milliseconds';
 
@@ -24,11 +25,12 @@ export default class StopWatch extends Component{
   }
 
   startButton() {
-    let style = this.state.running ? styles.stopButton : styles.startButton;
+    let buttonStyle = this.state.running ? styles.stopButton : styles.startButton;
+    let textStyle = this.state.running ? styles.stopText : styles.startText;
 
     return (
-      <TouchableHighlight style={[styles.button, style]} underlayColor="gray" onPress={this.handleStartPress}>
-        <Text>
+      <TouchableHighlight style={[styles.button, buttonStyle]} underlayColor="gray" onPress={this.handleStartPress}>
+        <Text style={[styles.buttonText, textStyle]}>
           {this.state.running ? 'Stop' : 'Start'}
         </Text>
       </TouchableHighlight>
@@ -37,16 +39,22 @@ export default class StopWatch extends Component{
 
   lapButton() {
     return (
-      <TouchableHighlight style={styles.button} underlayColor="gray" onPress={this.handleLapPress}>
-        <Text>Lap</Text>
+      <TouchableHighlight 
+        style={[styles.button, styles.lapButton]} 
+        underlayColor="rgba(255, 255, 255, 0.3)" 
+        onPress={this.handleLapPress}>
+        <Text style={[styles.buttonText, styles.lapText]}>Lap</Text>
       </TouchableHighlight>
     )
   }
 
   resetButton() {
     return (
-      <TouchableHighlight style={[styles.button, {borderColor: '#f1ff2e'}]} underlayColor="gray" onPress={this.handleResetPress}>
-        <Text>Reset</Text>
+      <TouchableHighlight 
+        style={[styles.button, styles.resetButton]} 
+        underlayColor="rgba(255, 214, 10, 0.3)" 
+        onPress={this.handleResetPress}>
+        <Text style={[styles.buttonText, styles.resetText]}>Reset</Text>
       </TouchableHighlight>
     )
   }
@@ -58,7 +66,7 @@ export default class StopWatch extends Component{
       return;
     }
 
-    this.setState({startTime: new Date()});
+    this.setState({startTime: new Date() - this.state.timeElapsed});
 
     this.interval = setInterval(() => {
       this.setState({
@@ -72,24 +80,30 @@ export default class StopWatch extends Component{
     let lap = this.state.timeElapsed;
 
     this.setState({
-      startTime: new Date(),
       laps: this.state.laps.concat([lap])
     }); 
   }
 
   laps() {
-    return this.state.laps.map(function(time, index) {
-      return (
-        <View key={index} style={styles.lap}>
-          <Text style={styles.lapText}>Lap #{index + 1}</Text>
-          <Text style={styles.lapText}>{formatTime(time)}</Text>
-        </View>
-      );
-    });
-  }
+  return this.state.laps.map(function(time, index) {
+    return (
+      <View key={index} style={styles.lapRow}>
+        <Text style={styles.lapRowText}>Lap #{index + 1}</Text>
+        <Text style={styles.lapRowText}>{formatTime(time)}</Text>
+      </View>
+    );
+  });
+}
 
   handleResetPress() {
+    if (this.state.running) {
+      this.handleStartPress();
+    }
+
     this.setState({
+      timeElapsed: null,
+      running: false,
+      startTime: null,
       laps: []
     })
   }
@@ -123,50 +137,91 @@ export default class StopWatch extends Component{
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 20
+    backgroundColor: '#000000', // Deep black background
+    paddingHorizontal: 25,
+    paddingTop: Platform.OS === 'ios' ? 60 : 40,
   },
   header: {
-    flex: 1
-  },
-  footer: {
-    flex: 1
+    flex: 0.5,
+    justifyContent: 'center',
   },
   timerWrapper: {
-    flex: 5,
+    flex: 4,
     justifyContent: 'center',
-    alignItems: 'center'
-  },
-  buttonWrapper: {
-    flex: 3,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center'
-  },
-  lap: {
-    justifyContent: 'space-around',
-    flexDirection: 'row',
-    backgroundColor: 'lightgray',
-    padding: 10,
-    marginTop: 10
-  },
-  button: {
-    borderWidth: 2,
-    height: 100,
-    width: 100,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   timer: {
-    fontSize: 60
+    fontSize: 84,
+    fontWeight: '200', // Ultra-thin weights look more premium
+    color: '#FFFFFF',
+    fontVariant: ['tabular-nums'], // Prevents numbers from jumping around
+    letterSpacing: -2,
   },
-  lapText: {
-    fontSize: 30
+  buttonWrapper: {
+    flex: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingBottom: 30,
   },
+  button: {
+    height: 80,
+    width: 80,
+    borderRadius: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1, // Thinner borders look more modern
+  },
+  // Using translucent backgrounds for that "Apple" look
   startButton: {
-    borderColor: 'green'
+    backgroundColor: 'rgba(45, 201, 110, 0.15)', // Very subtle green tint
+    borderColor: '#32D74B', // Bright "Neon" Green
+  },
+  startText: {
+    color: '#32D74B', // Matches the border
   },
   stopButton: {
-    borderColor: 'red'
-  }
+    backgroundColor: 'rgba(255, 69, 58, 0.15)', // Very subtle red tint
+    borderColor: '#FF453A', // Bright "System" Red
+  },
+  buttonText: {
+    fontSize: 18,
+    fontWeight: '500', // Slightly thicker text for readability
+  },
+  stopText: {
+    color: '#FF453A', // Matches the border
+  },
+  footer: {
+    flex: 3,
+  },
+  // Existing styles...
+  lapButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: '#FFFFFF',
+  },
+  lapText: {
+    color: '#FFFFFF',
+  },
+  resetButton: {
+    backgroundColor: 'rgba(255, 214, 10, 0.15)', // Subtle yellow tint
+    borderColor: '#FFD60A', // Bright yellow
+  },
+  resetText: {
+    color: '#FFD60A',
+  },
+  // Update your existing lapText to distinguish it from the button text
+  lapRow: {
+    flexDirection: 'row', 
+    justifyContent: 'space-between', // Pushes text to the far left and far right
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#2C2C2E', // Subtle dark mode separator
+  },
+  lapRowText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '400',
+    fontVariant: ['tabular-nums'], // Keeps the timer digits aligned
+  },
 });
