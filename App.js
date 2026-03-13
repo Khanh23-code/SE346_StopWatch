@@ -80,20 +80,21 @@ export default class StopWatch extends Component{
     let lap = this.state.timeElapsed;
 
     this.setState({
-      laps: this.state.laps.concat([lap])
+      laps: [lap, ...this.state.laps]
     }); 
   }
 
   laps() {
-  return this.state.laps.map(function(time, index) {
-    return (
-      <View key={index} style={styles.lapRow}>
-        <Text style={styles.lapRowText}>Lap #{index + 1}</Text>
-        <Text style={styles.lapRowText}>{formatTime(time)}</Text>
-      </View>
-    );
-  });
-}
+    let length = this.state.laps.length;
+    return this.state.laps.map(function(time, index) {
+      return (
+        <View key={index} style={styles.lapRow}>
+          <Text style={styles.lapRowText}>Lap #{length - index}</Text>
+          <Text style={styles.lapRowText}>{formatTime(time)}</Text>
+        </View>
+      );
+    });
+  }
 
   handleResetPress() {
     if (this.state.running) {
